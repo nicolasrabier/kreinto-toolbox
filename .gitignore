@@ -2,3 +2,4 @@
 src/main/resources/my.properties
 build/
 .gradle/
+.idea/
