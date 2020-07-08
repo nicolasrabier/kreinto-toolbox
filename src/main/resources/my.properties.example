@@ -1,0 +1,17 @@
+# -------------------------------------
+# TODO
+# copy & paste this file
+# remove .example for the filename
+# edit the properties
+# -------------------------------------
+
+app.config.managewp.server.path=https://your-server-name.managewp.com
+app.config.managewp.login=managewp-login
+app.config.managewp.password=managewp-pwd
+
+app.config.mail.smtp.server=smtp.server.domain.com
+app.config.mail.smtp.port=465
+app.config.mail.login=smtp-server-login
+app.config.mail.password=smtp-server-pwd
+
+app.config.admin.email=admin@domain.com
