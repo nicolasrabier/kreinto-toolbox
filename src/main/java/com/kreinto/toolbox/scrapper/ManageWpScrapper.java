@@ -1,6 +1,7 @@
 package com.kreinto.toolbox.scrapper;
 
 import com.kreinto.toolbox.util.EmailSender;
+import com.kreinto.toolbox.util.ExceptionUtil;
 import com.kreinto.toolbox.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
@@ -90,7 +91,7 @@ public class ManageWpScrapper {
                 }
             }
         } catch (Exception e){
-            log.error(e.getMessage() + "/n" + e.getStackTrace());
+            log.error(ExceptionUtil.format(e));
         }
     }
 

@@ -22,7 +22,7 @@ public class FileUtil {
             return prop;
 
         } catch (IOException ex) {
-            log.error(ex.getMessage() + "/n" + ex.getStackTrace());
+            log.error(ExceptionUtil.format(ex));
             return new Properties();
         }
 
