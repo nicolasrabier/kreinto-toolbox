@@ -32,6 +32,10 @@ public class ManageWpScrapper {
     // private final static String OVERVIEW_URL  = "/dashboard/overview";
     // private final static String OVERVIEW_URL  = "/dashboard/site/2277039/dashboard"; // Donna Ng
     private final static String OVERVIEW_URL  = "/dashboard/site/2283710/dashboard"; // Petite Chinoise
+    public static final String DIV_CLASS_SITE_NAME_SPAN = "//div[@class='site-name']//span";
+    public static final String DIV_NG_CLICK_UPDATE_ALL_$_EVENT = "//div[@ng-click='updateAll($event)']";
+    public static final String BUTTON_CALL_TO_ACTION_TEXT_UPDATE = "//button[@call-to-action-text='Update']";
+    public static final String BUTTON_NG_CLICK_SYNC_SITES = "//button[@ng-click='syncSites()']";
 
     public ManageWpScrapper() {
         Properties props = FileUtil.loadPropertiesFromResources("my.properties");
@@ -59,12 +63,14 @@ public class ManageWpScrapper {
                 if (bodyElement != null && bodyElement.isDisplayed()) {
                     driver.get(new StringBuilder(props.getProperty(SERVER_PATH)).append(OVERVIEW_URL).toString());
 
-                    WebElement refreshButton = driver.findElement(By.xpath("//button[@ng-click='syncSites()']"));
+                    log.debug("Test if refresh button is spinning.");
+                    WebElement refreshButton = driver.findElement(By.xpath(BUTTON_NG_CLICK_SYNC_SITES));
                     if ("disabled".equals(refreshButton.getAttribute("disabled"))) {
                         Wait wait = new FluentWait(driver).withTimeout(Duration.ofSeconds(280)).pollingEvery(Duration.ofSeconds(5)).ignoring(NoSuchElementException.class);
                         refreshButton = (WebElement) wait.until(new Function<WebDriver, WebElement>() {
                             public WebElement apply(WebDriver driver) {
-                                WebElement refreshButton = driver.findElement(By.xpath("//button[@ng-click='syncSites()']"));
+                                log.debug("Test again if refresh button is spinning.");
+                                WebElement refreshButton = driver.findElement(By.xpath(BUTTON_NG_CLICK_SYNC_SITES));
                                 if (refreshButton != null && "disabled".equals(refreshButton.getAttribute("disabled"))) {
                                     return null;
                                 } else {
@@ -77,14 +83,24 @@ public class ManageWpScrapper {
                         // wait2.until(ExpectedConditions.elementToBeClickable(refreshButton));
                     }
 
-                    WebElement updateAllButton = driver.findElement(By.xpath("//div[@ng-click='updateAll($event)']"));
-                    updateAllButton.click();
-                    System.out.println("updateAllButton enabled: " + updateAllButton.isEnabled());
+                    //TODO:
+                    // - grab the list of websites
+                    // - go to each website overview page
+                    // - click on 'update all'
+                    WebElement siteName = driver.findElement(By.xpath(DIV_CLASS_SITE_NAME_SPAN));
+                    log.info(String.format("site name: %s", siteName.getText()));
 
-                    WebElement confirmUpdateButton = driver.findElement(By.xpath("//button[@call-to-action-text='Update']"));
-                    confirmUpdateButton.click();
+                    try {
+                        WebElement updateAllButton = driver.findElement(By.xpath(DIV_NG_CLICK_UPDATE_ALL_$_EVENT));
+                        updateAllButton.click();
+                        log.debug("updateAllButton enabled: " + updateAllButton.isEnabled());
 
+                        WebElement confirmUpdateButton = driver.findElement(By.xpath(BUTTON_CALL_TO_ACTION_TEXT_UPDATE));
+                        confirmUpdateButton.click();
 
+                    } catch (NoSuchElementException e) {
+                        log.info("Everything is up to date.");
+                    }
 
                 } else {
                     new Exception("The webdriver cannot find the main div named 'managewp-orion'.");
