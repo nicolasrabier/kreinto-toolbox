@@ -16,6 +16,7 @@ import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -27,15 +28,17 @@ public class ManageWpScrapper {
     public static final String LOGIN = "app.config.managewp.login";
     public static final String PASSWORD = "app.config.managewp.password";
 
-    //TODO: set these variables in the config file
     private final static String LOGIN_URL = "/login";
     // private final static String OVERVIEW_URL  = "/dashboard/overview";
     // private final static String OVERVIEW_URL  = "/dashboard/site/2277039/dashboard"; // Donna Ng
-    private final static String OVERVIEW_URL  = "/dashboard/site/2283710/dashboard"; // Petite Chinoise
+    // private final static String OVERVIEW_URL  = "/dashboard/site/2283710/dashboard"; // Petite Chinoise
+    private final static String OVERVIEW_URL  = "/dashboard/websites?type=thumbnail";
+
     public static final String DIV_CLASS_SITE_NAME_SPAN = "//div[@class='site-name']//span";
     public static final String DIV_NG_CLICK_UPDATE_ALL_$_EVENT = "//div[@ng-click='updateAll($event)']";
     public static final String BUTTON_CALL_TO_ACTION_TEXT_UPDATE = "//button[@call-to-action-text='Update']";
     public static final String BUTTON_NG_CLICK_SYNC_SITES = "//button[@ng-click='syncSites()']";
+    public static final String MWP_SITE_STATUS_ICON_SPAN = "//mwp-site-status-icon//span";
 
     public ManageWpScrapper() {
         Properties props = FileUtil.loadPropertiesFromResources("my.properties");
@@ -87,21 +90,25 @@ public class ManageWpScrapper {
                     // - grab the list of websites
                     // - go to each website overview page
                     // - click on 'update all'
-                    WebElement siteName = driver.findElement(By.xpath(DIV_CLASS_SITE_NAME_SPAN));
-                    log.info(String.format("site name: %s", siteName.getText()));
-                    WebElement siteStatus = driver.findElement(By.xpath("//mwp-site-status-icon//span"));
-                    log.info(String.format("site status: %s", siteStatus.getAttribute("uib-tooltip")));
-                    if(!siteStatus.getAttribute("class").contains("status-ok")) {
-                        try {
-                            WebElement updateAllButton = driver.findElement(By.xpath(DIV_NG_CLICK_UPDATE_ALL_$_EVENT));
-                            updateAllButton.click();
-                            log.debug("updateAllButton enabled: " + updateAllButton.isEnabled());
+                    List<WebElement> websites = driver.findElements(By.xpath("//span[@class='website-name']"));
+                    for(WebElement website : websites) {
+                        website.click();
+                        WebElement siteName = driver.findElement(By.xpath(DIV_CLASS_SITE_NAME_SPAN));
+                        log.info(String.format("site name: %s", siteName.getText()));
+                        WebElement siteStatus = driver.findElement(By.xpath(MWP_SITE_STATUS_ICON_SPAN));
+                        log.info(String.format("site status: %s", siteStatus.getAttribute("uib-tooltip")));
+                        if (!siteStatus.getAttribute("class").contains("status-ok")) {
+                            try {
+                                WebElement updateAllButton = driver.findElement(By.xpath(DIV_NG_CLICK_UPDATE_ALL_$_EVENT));
+                                // updateAllButton.click();
+                                log.debug("updateAllButton enabled: " + updateAllButton.isEnabled());
 
-                            WebElement confirmUpdateButton = driver.findElement(By.xpath(BUTTON_CALL_TO_ACTION_TEXT_UPDATE));
-                            confirmUpdateButton.click();
+                                WebElement confirmUpdateButton = driver.findElement(By.xpath(BUTTON_CALL_TO_ACTION_TEXT_UPDATE));
+                                // confirmUpdateButton.click();
 
-                        } catch (NoSuchElementException e) {
-                            log.info("Everything is up to date.");
+                            } catch (NoSuchElementException e) {
+                                log.info("Everything is up to date.");
+                            }
                         }
                     }
                 } else {
