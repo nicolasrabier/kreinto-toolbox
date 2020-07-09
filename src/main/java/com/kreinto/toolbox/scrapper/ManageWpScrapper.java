@@ -89,19 +89,21 @@ public class ManageWpScrapper {
                     // - click on 'update all'
                     WebElement siteName = driver.findElement(By.xpath(DIV_CLASS_SITE_NAME_SPAN));
                     log.info(String.format("site name: %s", siteName.getText()));
+                    WebElement siteStatus = driver.findElement(By.xpath("//mwp-site-status-icon//span"));
+                    log.info(String.format("site status: %s", siteStatus.getAttribute("uib-tooltip")));
+                    if(!siteStatus.getAttribute("class").contains("status-ok")) {
+                        try {
+                            WebElement updateAllButton = driver.findElement(By.xpath(DIV_NG_CLICK_UPDATE_ALL_$_EVENT));
+                            updateAllButton.click();
+                            log.debug("updateAllButton enabled: " + updateAllButton.isEnabled());
 
-                    try {
-                        WebElement updateAllButton = driver.findElement(By.xpath(DIV_NG_CLICK_UPDATE_ALL_$_EVENT));
-                        updateAllButton.click();
-                        log.debug("updateAllButton enabled: " + updateAllButton.isEnabled());
+                            WebElement confirmUpdateButton = driver.findElement(By.xpath(BUTTON_CALL_TO_ACTION_TEXT_UPDATE));
+                            confirmUpdateButton.click();
 
-                        WebElement confirmUpdateButton = driver.findElement(By.xpath(BUTTON_CALL_TO_ACTION_TEXT_UPDATE));
-                        confirmUpdateButton.click();
-
-                    } catch (NoSuchElementException e) {
-                        log.info("Everything is up to date.");
+                        } catch (NoSuchElementException e) {
+                            log.info("Everything is up to date.");
+                        }
                     }
-
                 } else {
                     new Exception("The webdriver cannot find the main div named 'managewp-orion'.");
                 }
