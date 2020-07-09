@@ -21,7 +21,7 @@ public class EmailSender {
     public static void sendPlainEmail(String to, String cc, String subject, String body) {
 
         Properties props = System.getProperties();
-        props = FileUtil.loadProperties("my.properties");
+        props = FileUtil.loadPropertiesFromResources("my.properties");
         props.put("mail.smtp.host", props.getProperty(SMTP_SERVER_PROP));
         props.put("mail.smtp.auth", true);
         props.put("mail.smtp.port", props.getProperty(SMTP_PORT_PROP));

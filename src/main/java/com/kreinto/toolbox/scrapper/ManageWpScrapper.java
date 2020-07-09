@@ -34,7 +34,7 @@ public class ManageWpScrapper {
     private final static String OVERVIEW_URL  = "/dashboard/site/2283710/dashboard"; // Petite Chinoise
 
     public ManageWpScrapper() {
-        Properties props = FileUtil.loadProperties("my.properties");
+        Properties props = FileUtil.loadPropertiesFromResources("my.properties");
 
         try{
             System.setProperty("webdriver.chrome.driver", "/Users/nic/kreinto/projects/toolbox/drivers/macos/chromedriver");
