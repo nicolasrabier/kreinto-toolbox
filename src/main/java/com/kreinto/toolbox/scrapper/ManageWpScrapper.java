@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class ManageWpScrapper {
@@ -39,10 +40,11 @@ public class ManageWpScrapper {
     public static final String BUTTON_CALL_TO_ACTION_TEXT_UPDATE = "//button[@call-to-action-text='Update']";
     public static final String BUTTON_NG_CLICK_SYNC_SITES = "//button[@ng-click='syncSites()']";
     public static final String MWP_SITE_STATUS_ICON_SPAN = "//mwp-site-status-icon//span";
+    public static final String I_ANALYTICS_EVENT_OPEN_SINGLE_SITE = "//i[@analytics-event='Open Single Site']";
 
     public ManageWpScrapper() {
         Properties props = FileUtil.loadPropertiesFromResources("my.properties");
-
+        final String serverUrl = props.getProperty(SERVER_PATH);
         try{
             System.setProperty("webdriver.chrome.driver", "/Users/nic/kreinto/projects/toolbox/drivers/macos/chromedriver");
 
@@ -52,7 +54,7 @@ public class ManageWpScrapper {
 
             WebDriver driver = new ChromeDriver(options);
             driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
-            driver.get(new StringBuilder(props.getProperty(SERVER_PATH)).append(LOGIN_URL).toString());
+            driver.get(String.format("%s%s",serverUrl,LOGIN_URL));
 
             if(driver.findElement(By.name("email")) != null &&
                     driver.findElement(By.name("password")) != null &&
@@ -64,7 +66,7 @@ public class ManageWpScrapper {
                 // test if properly logged in
                 WebElement bodyElement = driver.findElement(By.id("managewp-orion"));
                 if (bodyElement != null && bodyElement.isDisplayed()) {
-                    driver.get(new StringBuilder(props.getProperty(SERVER_PATH)).append(OVERVIEW_URL).toString());
+                    driver.get(String.format("%s%s",serverUrl,OVERVIEW_URL));
 
                     log.debug("Test if refresh button is spinning.");
                     WebElement refreshButton = driver.findElement(By.xpath(BUTTON_NG_CLICK_SYNC_SITES));
@@ -90,9 +92,13 @@ public class ManageWpScrapper {
                     // - grab the list of websites
                     // - go to each website overview page
                     // - click on 'update all'
-                    List<WebElement> websites = driver.findElements(By.xpath("//span[@class='website-name']"));
-                    for(WebElement website : websites) {
-                        website.click();
+                    List<WebElement> websites = driver.findElements(By.xpath(I_ANALYTICS_EVENT_OPEN_SINGLE_SITE));
+                    List<String> websiteDashboardUrls = websites.stream().map(we -> we.getAttribute("href")).collect(Collectors.toList());
+
+                    for(String websiteDashboardUrl : websiteDashboardUrls) {
+                        log.info(String.format("go to: %s%s",serverUrl, websiteDashboardUrl));
+                        driver.get(String.format("%s%s",serverUrl, websiteDashboardUrl));
+
                         WebElement siteName = driver.findElement(By.xpath(DIV_CLASS_SITE_NAME_SPAN));
                         log.info(String.format("site name: %s", siteName.getText()));
                         WebElement siteStatus = driver.findElement(By.xpath(MWP_SITE_STATUS_ICON_SPAN));
@@ -109,10 +115,9 @@ public class ManageWpScrapper {
                             } catch (NoSuchElementException e) {
                                 log.info("Everything is up to date.");
                             }
+
                         }
                     }
-                } else {
-                    new Exception("The webdriver cannot find the main div named 'managewp-orion'.");
                 }
             }
         } catch (Exception e){
