@@ -1,6 +1,5 @@
 package com.kreinto.toolbox.scrapper;
 
-import com.kreinto.toolbox.util.EmailSender;
 import com.kreinto.toolbox.util.ExceptionUtil;
 import com.kreinto.toolbox.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -10,10 +9,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 import java.util.List;
@@ -33,7 +30,7 @@ public class ManageWpScrapper {
     // private final static String OVERVIEW_URL  = "/dashboard/overview";
     // private final static String OVERVIEW_URL  = "/dashboard/site/2277039/dashboard"; // Donna Ng
     // private final static String OVERVIEW_URL  = "/dashboard/site/2283710/dashboard"; // Petite Chinoise
-    private final static String OVERVIEW_URL  = "/dashboard/websites?type=thumbnail";
+    private final static String OVERVIEW_URL = "/dashboard/websites?type=thumbnail";
 
     public static final String DIV_CLASS_SITE_NAME_SPAN = "//div[@class='site-name']//span";
     public static final String DIV_NG_CLICK_UPDATE_ALL_$_EVENT = "//div[@ng-click='updateAll($event)']";
@@ -41,11 +38,12 @@ public class ManageWpScrapper {
     public static final String BUTTON_NG_CLICK_SYNC_SITES = "//button[@ng-click='syncSites()']";
     public static final String MWP_SITE_STATUS_ICON_SPAN = "//mwp-site-status-icon//span";
     public static final String I_ANALYTICS_EVENT_OPEN_SINGLE_SITE = "//i[@analytics-event='Open Single Site']";
+    public static final String SPAN_CONTAINS_CLASS_USER_NAME = "//span[contains(@class,'user-name')]";
 
     public ManageWpScrapper() {
         Properties props = FileUtil.loadPropertiesFromResources("my.properties");
         final String serverUrl = props.getProperty(SERVER_PATH);
-        try{
+        try {
             System.setProperty("webdriver.chrome.driver", "/Users/nic/kreinto/projects/toolbox/drivers/macos/chromedriver");
 
             final ChromeOptions options = new ChromeOptions();
@@ -54,9 +52,9 @@ public class ManageWpScrapper {
 
             WebDriver driver = new ChromeDriver(options);
             driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
-            driver.get(String.format("%s%s",serverUrl,LOGIN_URL));
+            driver.get(String.format("%s%s", serverUrl, LOGIN_URL));
 
-            if(driver.findElement(By.name("email")) != null &&
+            if (driver.findElement(By.name("email")) != null &&
                     driver.findElement(By.name("password")) != null &&
                     driver.findElement(By.id("sign-in-button")) != null) {
                 driver.findElement(By.name("email")).sendKeys(props.getProperty(LOGIN));
@@ -64,9 +62,10 @@ public class ManageWpScrapper {
                 driver.findElement(By.id("sign-in-button")).click();
 
                 // test if properly logged in
-                WebElement bodyElement = driver.findElement(By.id("managewp-orion"));
-                if (bodyElement != null && bodyElement.isDisplayed()) {
-                    driver.get(String.format("%s%s",serverUrl,OVERVIEW_URL));
+                WebElement usernameElement = driver.findElement(By.xpath(SPAN_CONTAINS_CLASS_USER_NAME));
+                if (usernameElement != null && props.getProperty(LOGIN).equals(usernameElement.getText().trim())) {
+                    // once logged in go to list of websites
+                    driver.get(String.format("%s%s", serverUrl, OVERVIEW_URL));
 
                     log.debug("Test if refresh button is spinning.");
                     WebElement refreshButton = driver.findElement(By.xpath(BUTTON_NG_CLICK_SYNC_SITES));
@@ -95,9 +94,9 @@ public class ManageWpScrapper {
                     List<WebElement> websites = driver.findElements(By.xpath(I_ANALYTICS_EVENT_OPEN_SINGLE_SITE));
                     List<String> websiteDashboardUrls = websites.stream().map(we -> we.getAttribute("href")).collect(Collectors.toList());
 
-                    for(String websiteDashboardUrl : websiteDashboardUrls) {
-                        log.info(String.format("go to: %s%s",serverUrl, websiteDashboardUrl));
-                        driver.get(String.format("%s%s",serverUrl, websiteDashboardUrl));
+                    for (String websiteDashboardUrl : websiteDashboardUrls) {
+                        log.info(String.format("go to: %s%s", serverUrl, websiteDashboardUrl));
+                        driver.get(String.format("%s%s", serverUrl, websiteDashboardUrl));
 
                         WebElement siteName = driver.findElement(By.xpath(DIV_CLASS_SITE_NAME_SPAN));
                         log.info(String.format("site name: %s", siteName.getText()));
@@ -120,7 +119,7 @@ public class ManageWpScrapper {
                     }
                 }
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error(ExceptionUtil.format(e));
         }
     }
