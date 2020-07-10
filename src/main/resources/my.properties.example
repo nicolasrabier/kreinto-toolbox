@@ -15,3 +15,5 @@ app.config.mail.login=smtp-server-login
 app.config.mail.password=smtp-server-pwd
 
 app.config.admin.email=admin@domain.com
+
+webdriver.chrome.driver=chromedriver-path
