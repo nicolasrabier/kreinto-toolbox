@@ -3,13 +3,11 @@ package com.kreinto.toolbox.scrapper;
 import com.kreinto.toolbox.util.ExceptionUtil;
 import com.kreinto.toolbox.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.List;
@@ -38,6 +36,7 @@ public class ManageWpScrapper {
     public static final String I_ANALYTICS_EVENT_OPEN_SINGLE_SITE = "//i[@analytics-event='Open Single Site']";
     public static final String SPAN_CONTAINS_CLASS_USER_NAME = "//span[contains(@class,'user-name')]";
     public static final String WEBDRIVER_CHROME_DRIVER = "webdriver.chrome.driver";
+    public static final String TEXTAREA_NG_MODEL_CURRENT_NOTE = "//textarea[@ng-model='currentNote']";
 
     public ManageWpScrapper() {
         Properties props = FileUtil.loadPropertiesFromResources("my.properties");
@@ -72,34 +71,44 @@ public class ManageWpScrapper {
                     ExpectedCondition<Boolean> syncingIsOver = arg0 -> !"disabled".equals(refreshButton.getAttribute("disabled"));
                     wait.until(syncingIsOver);
 
-
                     List<WebElement> websites = driver.findElements(By.xpath(I_ANALYTICS_EVENT_OPEN_SINGLE_SITE));
                     List<String> websiteDashboardUrls = websites.stream().map(we -> we.getAttribute("href")).collect(Collectors.toList());
 
                     for (String websiteDashboardUrl : websiteDashboardUrls) {
-                        log.info(String.format("go to: %s%s", serverUrl, websiteDashboardUrl));
-                        driver.get(String.format("%s%s", serverUrl, websiteDashboardUrl));
+                        try {
+                            log.info(String.format("go to: %s%s", serverUrl, websiteDashboardUrl));
+                            driver.get(String.format("%s%s", serverUrl, websiteDashboardUrl));
 
-                        WebElement siteName = driver.findElement(By.xpath(DIV_CLASS_SITE_NAME_SPAN));
-                        log.info(String.format("site name: %s", siteName.getText()));
-                        WebElement siteStatus = driver.findElement(By.xpath(MWP_SITE_STATUS_ICON_SPAN));
-                        log.info(String.format("site status: %s", siteStatus.getAttribute("uib-tooltip")));
-                        WebElement siteNotes = driver.findElement(By.xpath("//textarea[@ng-model='currentNote']"));
-                        log.info(String.format("site notes: %s", siteNotes.getText()));
+                            WebElement siteName = driver.findElement(By.xpath(DIV_CLASS_SITE_NAME_SPAN));
+                            log.info(String.format("site name: %s", siteName.getText()));
 
-                        if (!siteStatus.getAttribute("class").contains("status-ok")) {
-                            try {
-                                WebElement updateAllButton = driver.findElement(By.xpath(DIV_NG_CLICK_UPDATE_ALL_$_EVENT));
-                                // updateAllButton.click();
-                                log.debug("updateAllButton enabled: " + updateAllButton.isEnabled());
+                            final WebElement siteStatus = driver.findElement(By.xpath(MWP_SITE_STATUS_ICON_SPAN));
+                            String tmpStatus = siteStatus.getAttribute("uib-tooltip");
+                            wait = new WebDriverWait(driver, 10);
+                            ExpectedCondition<Boolean> statusHasChanged = arg0 -> !tmpStatus.equals(siteStatus.getAttribute("uib-tooltip"));
+                            wait.until(statusHasChanged);
 
-                                WebElement confirmUpdateButton = driver.findElement(By.xpath(BUTTON_CALL_TO_ACTION_TEXT_UPDATE));
-                                // confirmUpdateButton.click();
+                            log.info(String.format("site status: %s", siteStatus.getAttribute("uib-tooltip")));
+                            log.info(String.format("site status class: %s", siteStatus.getAttribute("class")));
 
-                            } catch (NoSuchElementException e) {
-                                log.info("Everything is up to date.");
+                            WebElement siteNotes = driver.findElement(By.xpath(TEXTAREA_NG_MODEL_CURRENT_NOTE));
+                            log.info(String.format("site notes: %s", siteNotes.getAttribute("value")));
+
+                            if(siteNotes.getAttribute("value").contains("no-update")) {
+                                log.info(String.format("no update on the website"));
+                            } else {
+                                if (!siteStatus.getAttribute("class").contains("status-ok")) {
+                                    WebElement updateAllButton = driver.findElement(By.xpath(DIV_NG_CLICK_UPDATE_ALL_$_EVENT));
+                                    log.info(String.format("perform update all: %s", updateAllButton.getAttribute("uib-tooltip")));
+                                    updateAllButton.click();
+
+                                    WebElement confirmUpdateButton = driver.findElement(By.xpath(BUTTON_CALL_TO_ACTION_TEXT_UPDATE));
+                                    log.info("confirm update all");
+                                    confirmUpdateButton.click();
+                                }
                             }
-
+                        } catch (NoSuchElementException e) {
+                            log.error(ExceptionUtil.format(e));
                         }
                     }
                 }
