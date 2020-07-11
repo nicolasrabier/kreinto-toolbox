@@ -38,6 +38,10 @@ public class ManageWpScrapper {
     public static final String TEXTAREA_NG_MODEL_CURRENT_NOTE = "//textarea[@ng-model='currentNote']";
 
     public ManageWpScrapper() {
+
+    }
+
+    public void updateAllWebsites(){
         WebDriverWait wait;
         Properties props = FileUtil.loadPropertiesFromResources("my.properties");
         final String serverUrl = props.getProperty(SERVER_PATH);
@@ -132,5 +136,5 @@ public class ManageWpScrapper {
             return null;
         }
     }
-    
+
 }
