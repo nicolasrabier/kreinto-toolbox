@@ -68,8 +68,7 @@ public class ManageWpScrapper {
                     driver.get(String.format("%s%s", serverUrl, OVERVIEW_URL));
 
                     waitUntilSyncingIsOver(driver);
-                    final WebElement refreshButton = driver.findElement(By.xpath(BUTTON_NG_CLICK_SYNC_SITES));
-                    refreshButton.click();
+                    driver.findElement(By.xpath(BUTTON_NG_CLICK_SYNC_SITES)).click();
                     waitUntilSyncingIsOver(driver);
 
                     List<WebElement> websites = driver.findElements(By.xpath(I_ANALYTICS_EVENT_OPEN_SINGLE_SITE));
@@ -95,7 +94,7 @@ public class ManageWpScrapper {
                             WebElement siteNotes = driver.findElement(By.xpath(TEXTAREA_NG_MODEL_CURRENT_NOTE));
                             log.info(String.format("site notes: %s", siteNotes.getAttribute("value")));
 
-                            if (siteNotes.getAttribute("value").contains("no-update")) {
+                            if (siteNotes.getAttribute("value").contains(ManageWpTag.NO_UPDATE.toString())) {
                                 log.info(String.format("no update on the website"));
                             } else {
                                 if (!siteStatus.getAttribute("class").contains("status-ok")) {
