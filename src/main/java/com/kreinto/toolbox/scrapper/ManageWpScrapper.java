@@ -25,9 +25,6 @@ public class ManageWpScrapper {
     public static final String PASSWORD = "app.config.managewp.password";
 
     private final static String LOGIN_URL = "/login";
-    // private final static String OVERVIEW_URL  = "/dashboard/overview";
-    // private final static String OVERVIEW_URL  = "/dashboard/site/2277039/dashboard"; // Donna Ng
-    // private final static String OVERVIEW_URL  = "/dashboard/site/2283710/dashboard"; // Petite Chinoise
     private final static String OVERVIEW_URL = "/dashboard/websites?type=thumbnail";
 
     public static final String DIV_CLASS_SITE_NAME_SPAN = "//div[@class='site-name']//span";
@@ -135,8 +132,5 @@ public class ManageWpScrapper {
             return null;
         }
     }
-
-    public static void main(String[] args) {
-        new ManageWpScrapper();
-    }
+    
 }
