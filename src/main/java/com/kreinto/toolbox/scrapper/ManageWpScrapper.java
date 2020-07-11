@@ -3,11 +3,13 @@ package com.kreinto.toolbox.scrapper;
 import com.kreinto.toolbox.util.ExceptionUtil;
 import com.kreinto.toolbox.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.List;
@@ -39,6 +41,7 @@ public class ManageWpScrapper {
     public static final String TEXTAREA_NG_MODEL_CURRENT_NOTE = "//textarea[@ng-model='currentNote']";
 
     public ManageWpScrapper() {
+        WebDriverWait wait;
         Properties props = FileUtil.loadPropertiesFromResources("my.properties");
         final String serverUrl = props.getProperty(SERVER_PATH);
         try {
@@ -64,12 +67,10 @@ public class ManageWpScrapper {
                     // once logged in go to list of websites
                     driver.get(String.format("%s%s", serverUrl, OVERVIEW_URL));
 
-                    log.debug("Test if refresh button is spinning.");
+                    waitUntilSyncingIsOver(driver);
                     final WebElement refreshButton = driver.findElement(By.xpath(BUTTON_NG_CLICK_SYNC_SITES));
-
-                    WebDriverWait wait = new WebDriverWait(driver, 600);
-                    ExpectedCondition<Boolean> syncingIsOver = arg0 -> !"disabled".equals(refreshButton.getAttribute("disabled"));
-                    wait.until(syncingIsOver);
+                    refreshButton.click();
+                    waitUntilSyncingIsOver(driver);
 
                     List<WebElement> websites = driver.findElements(By.xpath(I_ANALYTICS_EVENT_OPEN_SINGLE_SITE));
                     List<String> websiteDashboardUrls = websites.stream().map(we -> we.getAttribute("href")).collect(Collectors.toList());
@@ -84,7 +85,7 @@ public class ManageWpScrapper {
 
                             final WebElement siteStatus = driver.findElement(By.xpath(MWP_SITE_STATUS_ICON_SPAN));
                             String tmpStatus = siteStatus.getAttribute("uib-tooltip");
-                            wait = new WebDriverWait(driver, 10);
+                            wait = new WebDriverWait(driver, 60);
                             ExpectedCondition<Boolean> statusHasChanged = arg0 -> !tmpStatus.equals(siteStatus.getAttribute("uib-tooltip"));
                             wait.until(statusHasChanged);
 
@@ -94,10 +95,11 @@ public class ManageWpScrapper {
                             WebElement siteNotes = driver.findElement(By.xpath(TEXTAREA_NG_MODEL_CURRENT_NOTE));
                             log.info(String.format("site notes: %s", siteNotes.getAttribute("value")));
 
-                            if(siteNotes.getAttribute("value").contains("no-update")) {
+                            if (siteNotes.getAttribute("value").contains("no-update")) {
                                 log.info(String.format("no update on the website"));
                             } else {
                                 if (!siteStatus.getAttribute("class").contains("status-ok")) {
+                                    waitUntilSyncingIsOver(driver);
                                     WebElement updateAllButton = driver.findElement(By.xpath(DIV_NG_CLICK_UPDATE_ALL_$_EVENT));
                                     log.info(String.format("perform update all: %s", updateAllButton.getAttribute("uib-tooltip")));
                                     updateAllButton.click();
@@ -116,6 +118,22 @@ public class ManageWpScrapper {
 
         } catch (Exception e) {
             log.error(ExceptionUtil.format(e));
+        }
+    }
+
+    private void waitUntilSyncingIsOver(WebDriver driver) {
+        log.debug("Test if refresh button is spinning.");
+        final WebElement refreshButton = driver.findElement(By.xpath(BUTTON_NG_CLICK_SYNC_SITES));
+        WebDriverWait wait = new WebDriverWait(driver, 600);
+        ExpectedCondition<Boolean> syncingIsOver = arg0 -> refreshButton.getAttribute("disabled") == null && getInitialSplashScreen(driver) == null;
+        wait.until(syncingIsOver);
+    }
+
+    private WebElement getInitialSplashScreen(WebDriver driver) {
+        try {
+            return driver.findElement(By.id("initial-splash-screen"));
+        } catch (NoSuchElementException e) {
+            return null;
         }
     }
 
