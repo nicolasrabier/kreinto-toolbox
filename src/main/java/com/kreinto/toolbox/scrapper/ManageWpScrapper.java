@@ -37,81 +37,83 @@ public class ManageWpScrapper {
     public static final String WEBDRIVER_CHROME_DRIVER = "webdriver.chrome.driver";
     public static final String TEXTAREA_NG_MODEL_CURRENT_NOTE = "//textarea[@ng-model='currentNote']";
 
-    public ManageWpScrapper() {
+    private Properties props;
+    private String serverUrl;
+    private ChromeOptions options;
+    private WebDriver driver;
+    private WebDriverWait wait;
 
+    public ManageWpScrapper() {
+        props = FileUtil.loadPropertiesFromResources("my.properties");
+        serverUrl = props.getProperty(SERVER_PATH);
+
+        System.setProperty(WEBDRIVER_CHROME_DRIVER, props.getProperty(WEBDRIVER_CHROME_DRIVER));
+
+        options = new ChromeOptions();
+        options.addArguments("--headless");
+        options.addArguments("window-size=1200x600");
+
+        driver = new ChromeDriver(options);
+        driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
     }
 
     public void updateAllWebsites(){
-        WebDriverWait wait;
-        Properties props = FileUtil.loadPropertiesFromResources("my.properties");
-        final String serverUrl = props.getProperty(SERVER_PATH);
         try {
-            System.setProperty(WEBDRIVER_CHROME_DRIVER, props.getProperty(WEBDRIVER_CHROME_DRIVER));
-
-            final ChromeOptions options = new ChromeOptions();
-            options.addArguments("--headless");
-            options.addArguments("window-size=1200x600");
-
-            final WebDriver driver = new ChromeDriver(options);
-            driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+            // login
             driver.get(String.format("%s%s", serverUrl, LOGIN_URL));
 
-            if (driver.findElement(By.name("email")) != null &&
-                    driver.findElement(By.name("password")) != null &&
-                    driver.findElement(By.id("sign-in-button")) != null) {
-                driver.findElement(By.name("email")).sendKeys(props.getProperty(LOGIN));
-                driver.findElement(By.name("password")).sendKeys(props.getProperty(PASSWORD));
-                driver.findElement(By.id("sign-in-button")).click();
+            driver.findElement(By.name("email")).sendKeys(props.getProperty(LOGIN));
+            driver.findElement(By.name("password")).sendKeys(props.getProperty(PASSWORD));
+            driver.findElement(By.id("sign-in-button")).click();
 
-                final WebElement usernameElement = driver.findElement(By.xpath(SPAN_CONTAINS_CLASS_USER_NAME));
-                if (props.getProperty(LOGIN).equals(usernameElement.getAttribute("uib-tooltip"))) {
-                    // once logged in go to list of websites
-                    driver.get(String.format("%s%s", serverUrl, OVERVIEW_URL));
+            final WebElement usernameElement = driver.findElement(By.xpath(SPAN_CONTAINS_CLASS_USER_NAME));
+            if (props.getProperty(LOGIN).equals(usernameElement.getAttribute("uib-tooltip"))) {
+                // once logged in go to list of websites
+                driver.get(String.format("%s%s", serverUrl, OVERVIEW_URL));
 
-                    waitUntilSyncingIsOver(driver);
-                    driver.findElement(By.xpath(BUTTON_NG_CLICK_SYNC_SITES)).click();
-                    waitUntilSyncingIsOver(driver);
+                waitUntilSyncingIsOver(driver);
+                driver.findElement(By.xpath(BUTTON_NG_CLICK_SYNC_SITES)).click();
+                waitUntilSyncingIsOver(driver);
 
-                    List<WebElement> websites = driver.findElements(By.xpath(I_ANALYTICS_EVENT_OPEN_SINGLE_SITE));
-                    List<String> websiteDashboardUrls = websites.stream().map(we -> we.getAttribute("href")).collect(Collectors.toList());
+                List<WebElement> websites = driver.findElements(By.xpath(I_ANALYTICS_EVENT_OPEN_SINGLE_SITE));
+                List<String> websiteDashboardUrls = websites.stream().map(we -> we.getAttribute("href")).collect(Collectors.toList());
 
-                    for (String websiteDashboardUrl : websiteDashboardUrls) {
-                        try {
-                            log.info(String.format("go to: %s%s", serverUrl, websiteDashboardUrl));
-                            driver.get(String.format("%s%s", serverUrl, websiteDashboardUrl));
+                for (String websiteDashboardUrl : websiteDashboardUrls) {
+                    try {
+                        log.info(String.format("go to: %s%s", serverUrl, websiteDashboardUrl));
+                        driver.get(String.format("%s%s", serverUrl, websiteDashboardUrl));
 
-                            WebElement siteName = driver.findElement(By.xpath(DIV_CLASS_SITE_NAME_SPAN));
-                            log.info(String.format("site name: %s", siteName.getText()));
+                        WebElement siteName = driver.findElement(By.xpath(DIV_CLASS_SITE_NAME_SPAN));
+                        log.info(String.format("site name: %s", siteName.getText()));
 
-                            final WebElement siteStatus = driver.findElement(By.xpath(MWP_SITE_STATUS_ICON_SPAN));
-                            String tmpStatus = siteStatus.getAttribute("uib-tooltip");
-                            wait = new WebDriverWait(driver, 60);
-                            ExpectedCondition<Boolean> statusHasChanged = arg0 -> !tmpStatus.equals(siteStatus.getAttribute("uib-tooltip"));
-                            wait.until(statusHasChanged);
+                        final WebElement siteStatus = driver.findElement(By.xpath(MWP_SITE_STATUS_ICON_SPAN));
+                        String tmpStatus = siteStatus.getAttribute("uib-tooltip");
+                        wait = new WebDriverWait(driver, 60);
+                        ExpectedCondition<Boolean> statusHasChanged = arg0 -> !tmpStatus.equals(siteStatus.getAttribute("uib-tooltip"));
+                        wait.until(statusHasChanged);
 
-                            log.info(String.format("site status: %s", siteStatus.getAttribute("uib-tooltip")));
-                            log.info(String.format("site status class: %s", siteStatus.getAttribute("class")));
+                        log.info(String.format("site status: %s", siteStatus.getAttribute("uib-tooltip")));
+                        log.info(String.format("site status class: %s", siteStatus.getAttribute("class")));
 
-                            WebElement siteNotes = driver.findElement(By.xpath(TEXTAREA_NG_MODEL_CURRENT_NOTE));
-                            log.info(String.format("site notes: %s", siteNotes.getAttribute("value")));
+                        WebElement siteNotes = driver.findElement(By.xpath(TEXTAREA_NG_MODEL_CURRENT_NOTE));
+                        log.info(String.format("site notes: %s", siteNotes.getAttribute("value")));
 
-                            if (siteNotes.getAttribute("value").contains(ManageWpTag.NO_UPDATE.toString())) {
-                                log.info(String.format("no update on the website"));
-                            } else {
-                                if (!siteStatus.getAttribute("class").contains("status-ok")) {
-                                    waitUntilSyncingIsOver(driver);
-                                    WebElement updateAllButton = driver.findElement(By.xpath(DIV_NG_CLICK_UPDATE_ALL_$_EVENT));
-                                    log.info(String.format("perform update all: %s", updateAllButton.getAttribute("uib-tooltip")));
-                                    updateAllButton.click();
+                        if (siteNotes.getAttribute("value").contains(ManageWpTag.NO_UPDATE.toString())) {
+                            log.info(String.format("no update on the website"));
+                        } else {
+                            if (!siteStatus.getAttribute("class").contains("status-ok")) {
+                                waitUntilSyncingIsOver(driver);
+                                WebElement updateAllButton = driver.findElement(By.xpath(DIV_NG_CLICK_UPDATE_ALL_$_EVENT));
+                                log.info(String.format("perform update all: %s", updateAllButton.getAttribute("uib-tooltip")));
+                                updateAllButton.click();
 
-                                    WebElement confirmUpdateButton = driver.findElement(By.xpath(BUTTON_CALL_TO_ACTION_TEXT_UPDATE));
-                                    log.info("confirm update all");
-                                    confirmUpdateButton.click();
-                                }
+                                WebElement confirmUpdateButton = driver.findElement(By.xpath(BUTTON_CALL_TO_ACTION_TEXT_UPDATE));
+                                log.info("confirm update all");
+                                confirmUpdateButton.click();
                             }
-                        } catch (NoSuchElementException e) {
-                            log.error(ExceptionUtil.format(e));
                         }
+                    } catch (NoSuchElementException e) {
+                        log.error(ExceptionUtil.format(e));
                     }
                 }
             }
