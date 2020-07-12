@@ -57,7 +57,7 @@ public class ManageWpScrapper {
         driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
     }
 
-    public void updateAllWebsites(){
+    public void updateAllWebsites() {
         try {
             // login
             driver.get(String.format("%s%s", serverUrl, LOGIN_URL));
@@ -139,4 +139,8 @@ public class ManageWpScrapper {
         }
     }
 
+    public static void main(String[] args) {
+        ManageWpScrapper scrapper = new ManageWpScrapper();
+        scrapper.updateAllWebsites();
+    }
 }

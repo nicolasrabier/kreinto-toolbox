@@ -15,4 +15,9 @@ public class WordpressScrapper {
     public void flushCache(){
 
     }
+
+    public static void main(String[] args) {
+        WordpressScrapper scrapper = new WordpressScrapper();
+        scrapper.flushCache();
+    }
 }
