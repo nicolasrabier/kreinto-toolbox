@@ -29,16 +29,16 @@ public class ManageWpScrapper {
     private final static String LOGIN_URL = "/login";
     private final static String OVERVIEW_URL = "/dashboard/websites?type=thumbnail";
 
-    public static final String DIV_CLASS_SITE_NAME_SPAN = "//div[@class='site-name']//span";
-    public static final String DIV_NG_CLICK_UPDATE_ALL_$_EVENT = "//div[@ng-click='updateAll($event)']";
-    public static final String BUTTON_CALL_TO_ACTION_TEXT_UPDATE = "//button[@call-to-action-text='Update']";
-    public static final String BUTTON_NG_CLICK_SYNC_SITES = "//button[@ng-click='syncSites()']";
-    public static final String MWP_SITE_STATUS_ICON_SPAN = "//mwp-site-status-icon//span";
-    public static final String I_ANALYTICS_EVENT_OPEN_SINGLE_SITE = "//i[@analytics-event='Open Single Site']";
-    public static final String SPAN_CONTAINS_CLASS_USER_NAME = "//span[contains(@class,'user-name')]";
     public static final String WEBDRIVER_CHROME_DRIVER = "webdriver.chrome.driver";
-    public static final String TEXTAREA_NG_MODEL_CURRENT_NOTE = "//textarea[@ng-model='currentNote']";
-    public static final String A_ADMIN_SITE_SITE = "//a[@admin-site='site']";
+    private static final String DIV_CLASS_SITE_NAME_SPAN = "//div[@class='site-name']//span";
+    private static final String DIV_NG_CLICK_UPDATE_ALL_$_EVENT = "//div[@ng-click='updateAll($event)']";
+    private static final String BUTTON_CALL_TO_ACTION_TEXT_UPDATE = "//button[@call-to-action-text='Update']";
+    private static final String BUTTON_NG_CLICK_SYNC_SITES = "//button[@ng-click='syncSites()']";
+    private static final String MWP_SITE_STATUS_ICON_SPAN = "//mwp-site-status-icon//span";
+    private static final String I_ANALYTICS_EVENT_OPEN_SINGLE_SITE = "//i[@analytics-event='Open Single Site']";
+    private static final String SPAN_CONTAINS_CLASS_USER_NAME = "//span[contains(@class,'user-name')]";
+    private static final String TEXTAREA_NG_MODEL_CURRENT_NOTE = "//textarea[@ng-model='currentNote']";
+    private static final String A_ADMIN_SITE_SITE = "//a[@admin-site='site']";
 
     private Properties props;
     private String serverUrl;
