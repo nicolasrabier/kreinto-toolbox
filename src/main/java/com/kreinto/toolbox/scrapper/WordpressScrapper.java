@@ -30,6 +30,7 @@ public class WordpressScrapper implements Runnable {
         this.driver = driver;
         this.mwpDashboardUrl = mwpDashboardUrl;
         this.wpAdminUrl = wpAdminUrl;
+        log.info(String.format("mwpDashboardUrl: %s - wpAdminUrl: %s", mwpDashboardUrl, wpAdminUrl));
     }
 
     @Override
