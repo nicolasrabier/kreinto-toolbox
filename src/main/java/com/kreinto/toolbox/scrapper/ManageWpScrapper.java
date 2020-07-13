@@ -14,6 +14,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -36,12 +38,14 @@ public class ManageWpScrapper {
     public static final String SPAN_CONTAINS_CLASS_USER_NAME = "//span[contains(@class,'user-name')]";
     public static final String WEBDRIVER_CHROME_DRIVER = "webdriver.chrome.driver";
     public static final String TEXTAREA_NG_MODEL_CURRENT_NOTE = "//textarea[@ng-model='currentNote']";
+    public static final String A_ADMIN_SITE_SITE = "//a[@admin-site='site']";
 
     private Properties props;
     private String serverUrl;
     private ChromeOptions options;
     private WebDriver driver;
     private WebDriverWait wait;
+    final private ExecutorService executorService = Executors.newFixedThreadPool(10);
 
     public ManageWpScrapper() {
         props = FileUtil.loadPropertiesFromResources("my.properties");
@@ -80,11 +84,14 @@ public class ManageWpScrapper {
 
                 for (String websiteDashboardUrl : websiteDashboardUrls) {
                     try {
-                        log.info(String.format("go to: %s%s", serverUrl, websiteDashboardUrl));
-                        driver.get(String.format("%s%s", serverUrl, websiteDashboardUrl));
+                        String mwpWebsiteDashboardUrl = String.format("%s%s", serverUrl, websiteDashboardUrl);
+                        log.info(String.format("go to: %s", mwpWebsiteDashboardUrl));
+                        driver.get(mwpWebsiteDashboardUrl);
 
                         WebElement siteName = driver.findElement(By.xpath(DIV_CLASS_SITE_NAME_SPAN));
                         log.info(String.format("site name: %s", siteName.getText()));
+
+                        WebElement wpAdminButton = driver.findElement(By.xpath(A_ADMIN_SITE_SITE));
 
                         final WebElement siteStatus = driver.findElement(By.xpath(MWP_SITE_STATUS_ICON_SPAN));
                         String tmpStatus = siteStatus.getAttribute("uib-tooltip");
@@ -110,6 +117,8 @@ public class ManageWpScrapper {
                                 WebElement confirmUpdateButton = driver.findElement(By.xpath(BUTTON_CALL_TO_ACTION_TEXT_UPDATE));
                                 log.info("confirm update all");
                                 confirmUpdateButton.click();
+
+                                executorService.submit(new WordpressScrapper(driver, mwpWebsiteDashboardUrl, wpAdminButton.getAttribute("href")));
                             }
                         }
                     } catch (NoSuchElementException e) {
