@@ -3,20 +3,15 @@ package com.kreinto.toolbox.crawler;
 import com.kreinto.toolbox.util.ExceptionUtil;
 import com.kreinto.toolbox.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -53,7 +48,7 @@ public class ManageWpCrawler {
 
     }
 
-    public void updateAllWebsites() {
+    public boolean signingIn(WebDriver driver){
         try {
             // login
             driver.get(String.format("%s%s", serverUrl, LOGIN_URL));
@@ -64,6 +59,18 @@ public class ManageWpCrawler {
 
             final WebElement usernameElement = driver.findElement(By.xpath(SPAN_CONTAINS_CLASS_USER_NAME));
             if (props.getProperty(LOGIN).equals(usernameElement.getAttribute("uib-tooltip"))) {
+                return true;
+            }
+        } catch (Exception e) {
+            log.error(ExceptionUtil.format(e));
+        } finally {
+            return false;
+        }
+    }
+
+    public void updateAllWebsites() {
+        try {
+            if(signingIn(driver)) {
                 // once logged in go to list of websites
                 driver.get(String.format("%s%s", serverUrl, OVERVIEW_URL));
 
@@ -82,8 +89,6 @@ public class ManageWpCrawler {
 
                         WebElement siteName = driver.findElement(By.xpath(DIV_CLASS_SITE_NAME_SPAN));
                         log.info(String.format("site name: %s", siteName.getText()));
-
-                        WebElement wpAdminButton = driver.findElement(By.xpath(A_ADMIN_SITE_SITE));
 
                         final WebElement siteStatus = driver.findElement(By.xpath(MWP_SITE_STATUS_ICON_SPAN));
                         String tmpStatus = siteStatus.getAttribute("uib-tooltip");
@@ -118,7 +123,6 @@ public class ManageWpCrawler {
                     }
                 }
             }
-
         } catch (Exception e) {
             log.error(ExceptionUtil.format(e));
         }
