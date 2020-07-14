@@ -1,4 +1,4 @@
-package com.kreinto.toolbox.scrapper;
+package com.kreinto.toolbox.crawler;
 
 import com.kreinto.toolbox.util.ExceptionUtil;
 import com.kreinto.toolbox.util.FileUtil;
@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class ManageWpScrapper {
+public class ManageWpCrawler {
 
     public static final String SERVER_PATH = "app.config.managewp.server.path";
     public static final String LOGIN = "app.config.managewp.login";
@@ -47,7 +47,7 @@ public class ManageWpScrapper {
     private WebDriverWait wait;
     final private ExecutorService executorService = Executors.newFixedThreadPool(10);
 
-    public ManageWpScrapper() {
+    public ManageWpCrawler() {
         props = FileUtil.loadPropertiesFromResources("my.properties");
         serverUrl = props.getProperty(SERVER_PATH);
 
@@ -118,7 +118,7 @@ public class ManageWpScrapper {
                                 log.info("confirm update all");
                                 confirmUpdateButton.click();
 
-                                executorService.submit(new WordpressScrapper(driver, mwpWebsiteDashboardUrl, wpAdminButton.getAttribute("href")));
+                                executorService.submit(new ManageWpWaitForUpdate(driver.manage().getCookies(), mwpWebsiteDashboardUrl));
                             }
                         }
                     } catch (NoSuchElementException e) {
@@ -149,7 +149,8 @@ public class ManageWpScrapper {
     }
 
     public static void main(String[] args) {
-        ManageWpScrapper scrapper = new ManageWpScrapper();
+        ManageWpCrawler scrapper = new ManageWpCrawler();
         scrapper.updateAllWebsites();
     }
+
 }

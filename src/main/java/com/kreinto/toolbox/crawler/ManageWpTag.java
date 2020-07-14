@@ -1,4 +1,4 @@
-package com.kreinto.toolbox.scrapper;
+package com.kreinto.toolbox.crawler;
 
 public enum ManageWpTag {
 
