@@ -149,4 +149,30 @@ public class ManageWpCrawler {
         scrapper.updateAllWebsites();
     }
 
+    private class ManageWpWaitForUpdate implements Runnable {
+        private WebDriver driver;
+        private String mwpWebsiteDashboardUrl;
+
+        public ManageWpWaitForUpdate(Set<Cookie> cookies, String mwpWebsiteDashboardUrl) {
+            this.driver = CrawlerBuilder.buildWebDriver(props);
+            this.mwpWebsiteDashboardUrl = mwpWebsiteDashboardUrl;
+            cookies.stream().forEach(cookie -> driver.manage().addCookie(cookie));
+        }
+
+        @Override
+        public void run() {
+            driver.get(mwpWebsiteDashboardUrl);
+
+            // wait
+            final WebElement stateTitle = driver.findElement(By.xpath("//h4[@class='empty-state-title']"));
+            WebDriverWait wait = new WebDriverWait(driver, 600);
+            ExpectedCondition<Boolean> updatingIsOver = arg0 -> !(stateTitle.getText().equals("Updating Plugins"));
+            wait.until(updatingIsOver);
+
+            WebElement wpAdminButton = driver.findElement(By.xpath(A_ADMIN_SITE_SITE));
+
+            WordpressCrawler wpCrawler = new WordpressCrawler(driver, wpAdminButton.getAttribute("href"));
+            wpCrawler.run();
+        }
+    }
 }
