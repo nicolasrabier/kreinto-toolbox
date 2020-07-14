@@ -29,7 +29,6 @@ public class ManageWpCrawler {
     private final static String LOGIN_URL = "/login";
     private final static String OVERVIEW_URL = "/dashboard/websites?type=thumbnail";
 
-    public static final String WEBDRIVER_CHROME_DRIVER = "webdriver.chrome.driver";
     private static final String DIV_CLASS_SITE_NAME_SPAN = "//div[@class='site-name']//span";
     private static final String DIV_NG_CLICK_UPDATE_ALL_$_EVENT = "//div[@ng-click='updateAll($event)']";
     private static final String BUTTON_CALL_TO_ACTION_TEXT_UPDATE = "//button[@call-to-action-text='Update']";
@@ -42,7 +41,6 @@ public class ManageWpCrawler {
 
     private Properties props;
     private String serverUrl;
-    private ChromeOptions options;
     private WebDriver driver;
     private WebDriverWait wait;
     final private ExecutorService executorService = Executors.newFixedThreadPool(10);
@@ -51,14 +49,8 @@ public class ManageWpCrawler {
         props = FileUtil.loadPropertiesFromResources("my.properties");
         serverUrl = props.getProperty(SERVER_PATH);
 
-        System.setProperty(WEBDRIVER_CHROME_DRIVER, props.getProperty(WEBDRIVER_CHROME_DRIVER));
+        driver = CrawlerBuilder.buildWebDriver(props);
 
-        options = new ChromeOptions();
-        options.addArguments("--headless");
-        options.addArguments("window-size=1200x600");
-
-        driver = new ChromeDriver(options);
-        driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
     }
 
     public void updateAllWebsites() {
