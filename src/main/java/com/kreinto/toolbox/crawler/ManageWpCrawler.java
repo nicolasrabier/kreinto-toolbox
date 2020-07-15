@@ -7,6 +7,7 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -101,6 +102,7 @@ public class ManageWpCrawler {
 
                         WebElement siteNotes = driver.findElement(By.xpath(TEXTAREA_NG_MODEL_CURRENT_NOTE));
                         log.info(String.format("site notes: %s", siteNotes.getAttribute("value")));
+                        List<String> tags = Arrays.asList(siteNotes.getAttribute("value").split("\n"));
 
                         if (siteNotes.getAttribute("value").contains(ManageWpTag.NO_UPDATE.toString())) {
                             log.info(String.format("no update on the website"));
@@ -115,7 +117,9 @@ public class ManageWpCrawler {
                                 log.info("confirm update all");
                                 confirmUpdateButton.click();
 
-                                executorService.submit(new ManageWpWaitForUpdate(driver.manage().getCookies(), mwpWebsiteDashboardUrl));
+                                if(!tags.contains("no-cache")) {
+                                    executorService.submit(new ManageWpWaitForUpdate(driver.manage().getCookies(), mwpWebsiteDashboardUrl));
+                                }
                             }
                         }
                     } catch (NoSuchElementException e) {
