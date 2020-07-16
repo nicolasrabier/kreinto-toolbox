@@ -1,5 +1,6 @@
 package com.kreinto.toolbox.crawler;
 
+import com.kreinto.toolbox.crawler.managewp.ManageWpCrawler;
 import com.kreinto.toolbox.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;

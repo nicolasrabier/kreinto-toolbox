@@ -21,7 +21,7 @@ public class CrawlerBuilder {
         options.addArguments("--headless");
         options.addArguments("window-size=1200x600");
 
-        final WebDriver driver = new ChromeDriver(options);
+        WebDriver driver = new ChromeDriver(options);
         driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
         return driver;
