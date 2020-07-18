@@ -79,7 +79,7 @@ public class ManageWpCrawler {
                         String mwpWebsiteDashboardUrl = String.format("%s%s", serverUrl, websiteDashboardUrl);
                         log.info(String.format("go to: %s", mwpWebsiteDashboardUrl));
 
-                        executorService.submit(new ManageWpWebsiteCrawler(driver.manage().getCookies(), mwpWebsiteDashboardUrl));
+                        executorService.submit(new ManageWpWebsiteCrawler(props, driver.manage().getCookies(), mwpWebsiteDashboardUrl));
 
                     } catch (NoSuchElementException e) {
                         log.error(ExceptionUtil.format(e));

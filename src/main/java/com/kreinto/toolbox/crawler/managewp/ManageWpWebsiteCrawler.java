@@ -30,8 +30,7 @@ public class ManageWpWebsiteCrawler implements Runnable {
     private WebDriverWait wait;
     private String mwpWebsiteDashboardUrl;
 
-    public ManageWpWebsiteCrawler(Set<Cookie> cookies, String mwpWebsiteDashboardUrl) {
-        final Properties props = FileUtil.loadPropertiesFromResources("my.properties");
+    public ManageWpWebsiteCrawler(Properties props, Set<Cookie> cookies, String mwpWebsiteDashboardUrl) {
         driver = CrawlerBuilder.buildWebDriver(props);
         this.mwpWebsiteDashboardUrl = mwpWebsiteDashboardUrl;
 
