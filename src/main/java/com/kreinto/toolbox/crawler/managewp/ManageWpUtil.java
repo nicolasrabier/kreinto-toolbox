@@ -1,5 +1,6 @@
 package com.kreinto.toolbox.crawler.managewp;
 
+import com.kreinto.toolbox.util.ExceptionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -8,10 +9,16 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.util.Properties;
+
 @Slf4j
 public class ManageWpUtil {
 
+    public static final String LOGIN = "app.config.managewp.login";
+    public static final String PASSWORD = "app.config.managewp.password";
+
     public static final String BUTTON_NG_CLICK_SYNC_SITES = "//button[@ng-click='syncSites()']";
+    private static final String SPAN_CONTAINS_CLASS_USER_NAME = "//span[contains(@class,'user-name')]";
 
     protected static void waitUntilSyncingIsOver(WebDriver driver) {
         log.debug("Test if refresh button is spinning.");
@@ -27,6 +34,22 @@ public class ManageWpUtil {
         } catch (NoSuchElementException e) {
             return null;
         }
+    }
+
+    public static boolean signingIn(WebDriver driver, Properties props){
+        try {
+            driver.findElement(By.name("email")).sendKeys(props.getProperty(LOGIN));
+            driver.findElement(By.name("password")).sendKeys(props.getProperty(PASSWORD));
+            driver.findElement(By.id("sign-in-button")).click();
+
+            final WebElement usernameElement = driver.findElement(By.xpath(SPAN_CONTAINS_CLASS_USER_NAME));
+            if (props.getProperty(LOGIN).equals(usernameElement.getAttribute("uib-tooltip"))) {
+                return true;
+            }
+        } catch (Exception e) {
+            log.error(ExceptionUtil.format(e));
+        }
+        return false;
     }
 
 }

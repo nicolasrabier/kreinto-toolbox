@@ -1,6 +1,7 @@
 package com.kreinto.toolbox.crawler;
 
 import com.kreinto.toolbox.crawler.managewp.ManageWpCrawler;
+import com.kreinto.toolbox.crawler.managewp.ManageWpUtil;
 import com.kreinto.toolbox.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
@@ -70,9 +71,7 @@ public class WordpressCrawler implements Runnable {
 
         driver.get(args[0]);
 
-        driver.findElement(By.name("email")).sendKeys(props.getProperty(ManageWpCrawler.LOGIN));
-        driver.findElement(By.name("password")).sendKeys(props.getProperty(ManageWpCrawler.PASSWORD));
-        driver.findElement(By.id("sign-in-button")).click();
+        ManageWpUtil.signingIn(driver, props);
 
         WordpressCrawler scrapper = new WordpressCrawler(null, args[0]);
         scrapper.run();
