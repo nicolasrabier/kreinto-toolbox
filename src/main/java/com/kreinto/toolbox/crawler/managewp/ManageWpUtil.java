@@ -2,14 +2,12 @@ package com.kreinto.toolbox.crawler.managewp;
 
 import com.kreinto.toolbox.util.ExceptionUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.Properties;
+import java.util.Set;
 
 @Slf4j
 public class ManageWpUtil {
@@ -37,17 +35,13 @@ public class ManageWpUtil {
     }
 
     public static boolean signingIn(WebDriver driver, Properties props){
-        try {
-            driver.findElement(By.name("email")).sendKeys(props.getProperty(LOGIN));
-            driver.findElement(By.name("password")).sendKeys(props.getProperty(PASSWORD));
-            driver.findElement(By.id("sign-in-button")).click();
+        driver.findElement(By.name("email")).sendKeys(props.getProperty(LOGIN));
+        driver.findElement(By.name("password")).sendKeys(props.getProperty(PASSWORD));
+        driver.findElement(By.id("sign-in-button")).click();
 
-            final WebElement usernameElement = driver.findElement(By.xpath(SPAN_CONTAINS_CLASS_USER_NAME));
-            if (props.getProperty(LOGIN).equals(usernameElement.getAttribute("uib-tooltip"))) {
-                return true;
-            }
-        } catch (Exception e) {
-            log.error(ExceptionUtil.format(e));
+        final WebElement usernameElement = driver.findElement(By.xpath(SPAN_CONTAINS_CLASS_USER_NAME));
+        if (props.getProperty(LOGIN).equals(usernameElement.getAttribute("uib-tooltip"))) {
+            return true;
         }
         return false;
     }

@@ -21,7 +21,7 @@ public class ManageWpCrawler {
 
     public static final String SERVER_PATH = "app.config.managewp.server.path";
 
-    private final static String LOGIN_URL = "/login";
+    public final static String LOGIN_URL = "/login";
     private final static String OVERVIEW_URL = "/dashboard/websites?type=thumbnail";
 
     private static final String I_ANALYTICS_EVENT_OPEN_SINGLE_SITE = "//i[@analytics-event='Open Single Site']";
@@ -45,6 +45,7 @@ public class ManageWpCrawler {
             driver.get(String.format("%s%s", serverUrl, LOGIN_URL));
 
             if(ManageWpUtil.signingIn(driver, props)) {
+
                 // once logged in go to list of websites
                 driver.get(String.format("%s%s", serverUrl, OVERVIEW_URL));
 
@@ -58,8 +59,8 @@ public class ManageWpCrawler {
                 for (String websiteDashboardUrl : websiteDashboardUrls) {
                     try {
                         String mwpWebsiteDashboardUrl = String.format("%s%s", serverUrl, websiteDashboardUrl);
-                        executorService.submit(new ManageWpWebsiteCrawler(props, driver.manage().getCookies(), mwpWebsiteDashboardUrl));
-                        Thread.currentThread().sleep(5000);
+                        executorService.execute(new ManageWpWebsiteCrawler(props, driver.manage().getCookies(), mwpWebsiteDashboardUrl));
+                        Thread.currentThread().sleep(10000);
                     } catch (NoSuchElementException e) {
                         log.error(ExceptionUtil.format(e));
                     }
