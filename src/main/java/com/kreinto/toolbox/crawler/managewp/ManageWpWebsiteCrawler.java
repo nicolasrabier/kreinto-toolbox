@@ -32,12 +32,11 @@ public class ManageWpWebsiteCrawler implements Runnable {
         this.props = props;
         driver = CrawlerBuilder.buildWebDriver(props);
         this.mwpWebsiteDashboardUrl = mwpWebsiteDashboardUrl;
-        run();
     }
 
     @Override
     public void run() {
-        log.info(String.format("go to: %s", mwpWebsiteDashboardUrl));
+        logMsg(String.format("> Start crawler on: %s", mwpWebsiteDashboardUrl));
         driver.get(mwpWebsiteDashboardUrl);
 
         if(ManageWpUtil.signingIn(driver, props)) {
@@ -54,7 +53,7 @@ public class ManageWpWebsiteCrawler implements Runnable {
             try {
                 wait.until(statusHasChanged);
             } catch (TimeoutException e) {
-                
+
             }
 
             logMsg(String.format("site status: %s", siteStatus.getAttribute("uib-tooltip")));
@@ -95,6 +94,7 @@ public class ManageWpWebsiteCrawler implements Runnable {
                 }
             }
         }
+        logMsg(String.format("< End crawler on: %s", mwpWebsiteDashboardUrl));
     }
 
     private void logMsg(String message){
