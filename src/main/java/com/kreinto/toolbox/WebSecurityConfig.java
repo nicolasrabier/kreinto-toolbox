@@ -35,7 +35,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
-                //.loginPage("/login")
+                .loginPage("/login")
                 .loginProcessingUrl("/perform_login")
                 .defaultSuccessUrl("/homepage", true)
                 .failureUrl("/login?error=true")
@@ -43,6 +43,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .logout()
                 .logoutUrl("/perform_logout")
+                .logoutSuccessUrl("/login?logout")
+                .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 //.logoutSuccessHandler(logoutSuccessHandler())
                 ;
