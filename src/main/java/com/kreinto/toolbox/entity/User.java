@@ -1,4 +1,4 @@
-package com.kreinto.toolbox.dao;
+package com.kreinto.toolbox.entity;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +10,7 @@ import java.util.Date;
 @Setter
 @Getter
 @NoArgsConstructor
+
 public class User {
 
     private String username;
