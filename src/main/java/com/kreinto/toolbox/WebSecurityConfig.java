@@ -28,35 +28,39 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/admin/**").hasRole("ADMIN")
-                .antMatchers("/anonymous*").anonymous()
-                .antMatchers("/login*").permitAll()
+                //.antMatchers("/**").hasRole("ADMIN")
+                //.antMatchers("/admin/**").hasRole("ADMIN")
+                //.antMatchers("/anonymous*").anonymous()
+                //.antMatchers("/login*").permitAll()
                 .antMatchers(staticResources).permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
-                .loginPage("/login")
-                .loginProcessingUrl("/perform_login")
+                .loginPage("/login").permitAll()
+                //.loginProcessingUrl("/perform_login")
                 .defaultSuccessUrl("/homepage", true)
                 .failureUrl("/login?error=true")
                 //.failureHandler(authenticationFailureHandler())
+
                 .and()
-                .logout()
-                .logoutUrl("/perform_logout")
+                .logout().permitAll()
+                //.logoutUrl("/perform_logout")
                 .logoutSuccessUrl("/login?logout")
                 .invalidateHttpSession(true)
+                .clearAuthentication(true)
                 .deleteCookies("JSESSIONID")
+
                 //.logoutSuccessHandler(logoutSuccessHandler())
                 ;
     }
 
     protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
         auth.inMemoryAuthentication()
-                .withUser("nico@kreinto.com.au").password(passwordEncoder().encode("nico")).roles("USER")
+                .withUser("nico@nico.n").password(passwordEncoder().encode("nico")).roles("USER")
                 .and()
-                .withUser("user2@kreinto.com.au").password(passwordEncoder().encode("user2")).roles("USER")
+                .withUser("user2@user.u").password(passwordEncoder().encode("user2")).roles("USER")
                 .and()
-                .withUser("admin@kreinto.com.au").password(passwordEncoder().encode("admin")).roles("ADMIN");
+                .withUser("admin@admin.a").password(passwordEncoder().encode("admin")).roles("ADMIN");
     }
 /*
     @Bean

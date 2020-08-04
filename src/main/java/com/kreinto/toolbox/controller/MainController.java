@@ -1,6 +1,7 @@
 package com.kreinto.toolbox.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -9,15 +10,12 @@ public class MainController {
 
     @RequestMapping("/")
     public ModelAndView index() {
-        ModelAndView modelAndView = new ModelAndView();
-        modelAndView.setViewName("homepage.html");
-        return modelAndView;
+        return new ModelAndView("homepage.html");
     }
 
-    /*
-    @RequestMapping("/hello")
-    public String hello() {
-        return "oi oi!";
+    //@RequestMapping(value = "/login", method = {RequestMethod.GET, RequestMethod.POST})
+    @RequestMapping("/login")
+    public ModelAndView login() {
+        return new ModelAndView("login.html");
     }
-    */
 }

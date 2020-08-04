@@ -29,19 +29,19 @@
     <link href="/css/signin.css" rel="stylesheet">
   </head>
     <body class="text-center">
-        <form class="form-signin" th:action="@{/perform_login}" method="post">
+        <form class="form-signin" th:action="@{/login}" method="post">
             <img class="mb-4" src="/image/squarred-logo-512.png" alt="" width="72" height="72">
-            <div th:if="${param.error}" class="alert alert-error">
+            <div th:if="${param.error}" class="alert alert-danger">
                 Invalid username and password.
             </div>
             <div th:if="${param.logout}" class="alert alert-success">
                 You have been logged out.
             </div>
             <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-            <label for="inputEmail" class="sr-only">Email address</label>
-            <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
-            <label for="inputPassword" class="sr-only">Password</label>
-            <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+            <label for="username" class="sr-only">Email address</label>
+            <input type="email" id="username" name="username" class="form-control" placeholder="Email address" required autofocus>
+            <label for="password" class="sr-only">Password</label>
+            <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
             <div class="checkbox mb-3">
                 <label>
                     <input type="checkbox" value="remember-me"> Remember me
